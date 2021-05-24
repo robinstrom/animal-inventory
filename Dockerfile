@@ -13,7 +13,11 @@ USER ${USER_ID}
 RUN java -Djarmode=layertools -jar build/libs/animal-inventory.jar extract
 
 FROM adoptopenjdk:16-jre-hotspot
+USER ${USER_ID}
 WORKDIR application
+RUN curl -OL https://github.com/jwilder/dockerize/releases/download/v0.6.1/dockerize-alpine-linux-amd64-v0.6.1.tar.gz \
+    && tar -C /usr/local/bin -xvf dockerize-alpine-linux-amd64-v0.6.1.tar.gz \
+    && rm dockerize-alpine-linux-amd64-v0.6.1.tar.gz
 COPY --from=builder application/dependencies/ ./
 COPY --from=builder application/snapshot-dependencies/ ./
 COPY --from=builder application/spring-boot-loader/ ./

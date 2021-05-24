@@ -7,15 +7,17 @@ services:
       args:
         - USER_ID=${USER_ID}
     container_name: app
-    depends_on:
-      - db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/compose-postgres
       - SPRING_DATASOURCE_USERNAME=compose-postgres
       - SPRING_DATASOURCE_PASSWORD=compose-postgres
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     ports:
     - 8081:8081
+    entrypoint: ["bash", "-c", "dockerize -wait tcp://db:5432 -wait tcp://config:8888 -timeout 60s && java org.springframework.boot.loader.JarLauncher"]
+
+  config:
+    image: 'config-server'
+    container_name: config-server
 
   db:
     image: 'postgres:11-alpine'

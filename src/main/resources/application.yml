@@ -1,13 +1,14 @@
 server:
   port: 8081
 spring:
-  datasource:
-    url: "${SPRING_DATASOURCE_URL}"
-    username: "${SPRING_USERNAME_URL}"
-    password: "${SPRING_PASSWORD_URL}"
-    hikari:
-      connectionTimeout: 20000
-      maximumPoolSize: 5
-  jpa:
-    hibernate:
-      ddl-auto: create
+  application:
+    name: animal-inventory
+  profiles:
+    active: dev
+  cloud:
+    config:
+      uri: http://config:8888
+      username: root
+      password: s3cr3t
+  config:
+    import: configserver:http://config:8888/

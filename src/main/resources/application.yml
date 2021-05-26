@@ -1,14 +1,23 @@
 server:
   port: 8081
 spring:
-  application:
-    name: animal-inventory
   profiles:
     active: dev
+  application:
+    name: animal-inventory
   cloud:
+    vault:
+      authentication: TOKEN
+      token: s.1qyHXXXs4pmBBxmCHjrWqzjU
+      scheme: http
+      host: vault
+      port: 8200
+      kv:
+        enabled: true
+        backend: secret
     config:
       uri: http://config:8888
       username: root
       password: s3cr3t
   config:
-    import: configserver:http://config:8888/
+    import: optional:configserver:http://config:8888/,vault://secret/animal-inventory

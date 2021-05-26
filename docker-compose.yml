@@ -7,21 +7,47 @@ services:
       args:
         - USER_ID=${USER_ID}
     container_name: app
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/compose-postgres
-      - SPRING_DATASOURCE_USERNAME=compose-postgres
-      - SPRING_DATASOURCE_PASSWORD=compose-postgres
     ports:
     - 8081:8081
     entrypoint: ["bash", "-c", "dockerize -wait tcp://db:5432 -wait tcp://config:8888 -timeout 60s && java org.springframework.boot.loader.JarLauncher"]
-
-  config:
-    image: 'config-server'
-    container_name: config-server
 
   db:
     image: 'postgres:11-alpine'
     container_name: db
     environment:
-      - POSTGRES_USER=compose-postgres
-      - POSTGRES_PASSWORD=compose-postgres
+      POSTGRES_USER: compose-postgres
+      POSTGRES_PASSWORD: compose-postgres
+    ports:
+    - 5432:5432
+
+  config:
+    image: 'config-server'
+    container_name: config
+    ports:
+    - 8888:8888
+
+  vault:
+    image: 'vault:1.7.1'
+    container_name: vault
+    environment:
+      VAULT_ADDR: 'http://localhost:8200'
+    cap_add:
+      - IPC_LOCK
+    volumes:
+    - ~/vault/data:/vault/data
+    ports:
+    - 8200:8200
+    command: 'server -config=/vault/data/config.hcl'
+
+  vault_unsealer:
+    image: 'vault:1.7.1'
+    container_name: vault_unsealer
+    environment:
+      VAULT_ADDR: 'http://localhost:8100'
+    cap_add:
+      - IPC_LOCK
+    volumes:
+    - ~/vault_unsealer/data:/vault/data
+    ports:
+      - 8100:8100
+    command: 'server -config=/vault/data/config.hcl'
